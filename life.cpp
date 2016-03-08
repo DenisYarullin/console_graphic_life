@@ -4,12 +4,12 @@
 
 
 
-Life::Life(unsigned weight_, unsigned height_)
-    : weight(weight_), height(height_), live_cell_count(0)
+Life::Life(unsigned height_, unsigned width_)
+    : height(height_), width(width_),live_cell_count(0)
 {
-    world.resize(weight);
+    world.resize(height);
     for(auto &x: world)
-        x.resize(height);
+        x.resize(width);
 }
 
 
@@ -53,11 +53,62 @@ unsigned  Life::liveCellsCount() const
 
 void Life::currentCellNeighborsCoord(vector<Cell> &neighbors, Cell currentCell)
 {
+    unsigned counter = 0;
+
     for (signed h = currentCell.x - 1; h <= currentCell.x + 1; h++)
     {
         for (signed w = currentCell.y - 1; w <= currentCell.y; w++)
         {
-
+            // верхняя граница мира
+            if (h < 0)
+            {
+                // левый угол
+                if (w < 0)
+                {
+                    neighbors[counter] = Cell(height - 1, width - 1);
+                }
+                // правый угол
+                else if (w > width - 1)
+                {
+                    neighbors[counter] = Cell(height - 1, 0);
+                }
+                else
+                {
+                    neighbors[counter] = Cell(height - 1, w);
+                }
+            }
+            // нижняя граница мира
+            else if (h > height - 1)
+            {
+                // левый угол
+                if (w < 0)
+                {
+                    neighbors[counter] = Cell(0, width - 1);
+                }
+                // правый угол
+                else if (w > width - 1)
+                {
+                    neighbors[counter] = Cell(0, 0);
+                }
+                else
+                {
+                    neighbors[counter] = Cell(0, w);
+                }
+            }
+            // левая граница мира
+            else if (w < 0)
+            {
+                neighbors[counter] = Cell(h, width - 1);
+            }
+            // правая граница мира
+            else if (w > width - 1)
+            {
+                neighbors[counter] = Cell(h, 0);
+            }
+            else
+            {
+                 neighbors[counter] = Cell(h, w);
+            }
         }
     }
 }

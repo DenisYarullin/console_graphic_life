@@ -34,11 +34,14 @@ private:
     {
         unsigned x;
         unsigned y;
-        unsigned is_live : 1;
+        bool is_live;
+
+        Cell() = default;
+        Cell(unsigned x_, unsigned y_) : x(x_), y(y_), is_live(false) {}
     };
 
-    unsigned weight;
     unsigned height;
+    unsigned width;
     mutable unsigned live_cell_count;
 
     vector<vector<Cell>> world;
@@ -50,7 +53,7 @@ private:
 
 public:
 
-    Life(unsigned weight_, unsigned height_);
+    Life(unsigned height_, unsigned width_);
 
     void begin_simulation();
 
