@@ -6,7 +6,8 @@ using namespace std;
 int main()
 {
     Life life(10, 10);
+    life.begin_simulation();
 
-    cout << "Hello World!" << endl;
+    cin.get();
     return 0;
 }

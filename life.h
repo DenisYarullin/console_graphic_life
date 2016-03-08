@@ -17,31 +17,42 @@
 #define LIFE_H_
 
 
+#include <iostream>
 #include <vector>
 
+
 using std::vector;
+using std::cout;
+using std::endl;
 
 
 class Life
 {
 private:
 
-    struct cell
+    struct Cell
     {
+        unsigned x;
+        unsigned y;
         unsigned is_live : 1;
     };
 
-    unsigned int weight;
-    unsigned int height;
+    unsigned weight;
+    unsigned height;
+    mutable unsigned live_cell_count;
 
-    vector<vector<cell>> world;
+    vector<vector<Cell>> world;
 
-    void init_world();
+    void initWorld();
+    void drawWorld() const;
+    unsigned liveCellsCount() const;
+    void currentCellNeighborsCoord(vector<Cell> &neighbors, Cell currentCell);
 
 public:
 
-    Life(unsigned int weight_, unsigned int height_);
+    Life(unsigned weight_, unsigned height_);
 
+    void begin_simulation();
 
 
 };
