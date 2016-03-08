@@ -20,10 +20,8 @@ void Life::init_world()
     std::uniform_int_distribution<> dis(1, 10000);
 
     for(auto &h: world)
-    {
         for(auto &w: h)
-        {
             w.is_live = dis(gen) % 2;
-        }
-    }
+
+
 }
