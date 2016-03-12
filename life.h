@@ -32,24 +32,29 @@ private:
 
     struct Cell
     {
-        unsigned x;
-        unsigned y;
+        int x;
+        int y;
         bool is_live;
 
         Cell() = default;
-        Cell(unsigned x_, unsigned y_) : x(x_), y(y_), is_live(false) {}
+        Cell(int x_, int y_) : x(x_), y(y_), is_live(false) {}
     };
 
     unsigned height;
     unsigned width;
     mutable unsigned live_cell_count;
+    mutable vector<Cell> neighbors;
 
     vector<vector<Cell>> world;
+    vector<vector<Cell>> oldWorld;
 
     void initWorld();
     void drawWorld() const;
     unsigned liveCellsCount() const;
     void currentCellNeighborsCoord(vector<Cell> &neighbors, Cell currentCell);
+    unsigned currentCellLiveNeighborsCount(Cell currentCell);
+    void createNextGeneration();
+    bool compareWorlds();
 
 public:
 
