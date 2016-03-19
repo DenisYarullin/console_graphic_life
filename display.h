@@ -1,7 +1,6 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-
 class Life;
 
 class Display
@@ -34,6 +33,5 @@ public:
     virtual bool endSimulation() const;
     virtual void drawWorld(const Life &life);
 };
-
 
 #endif // DISPLAY_H
