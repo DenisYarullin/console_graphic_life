@@ -1,74 +1,64 @@
 #include "life.h"
+#include "display.h"
 #include <random>
 #include <algorithm>
+#include <locale.h>
+#include <ncursesw/ncurses.h>
 
 
-Life::Life(unsigned height_, unsigned width_)
-    : height(height_), width(width_), live_cell_count(0), neighbors(8, Cell())
+#if defined(_WIN32) || defined(_WIN64)
+    #include <windows.h>
+    #define msleep(msec) Sleep(msec)
+#else
+    #include <unistd.h>
+    #define msleep(msec) usleep(msec*1000)
+#endif
+
+
+Life::Life(unsigned height, unsigned width)
+    : height_(height), width_(width), live_cell_count_(0), neighbors_(8, Cell())
 {
-    world.resize(height);
-
-    for (unsigned h = 0; h < height; h++)
-    {
-        world[h].resize(width_);
-        for(unsigned w = 0; w < width; w++)
-        {
-            world[h][w].x = h;
-            world[h][w].y = w;
-        }
-    }
+    world_.resize(height_, std::vector<Cell>(width_));
 }
 
 
-void Life::initWorld()
+void Life::randomInitWorld()
 {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(1, 10000);
 
-    for(auto &h: world)
-        for(auto &w: h)
-            w.is_live = dis(gen) % 2;
-}
-
-
-void Life::drawWorld() const
-{
-    live_cell_count = 0;
-
-    for(const auto &h: world)
+    for (unsigned h = 0; h < height_; h++)
     {
-        for(const auto &w: h)
+        for(unsigned w = 0; w < width_; w++)
         {
-            if (w.is_live)
+            if (dis(gen) % 2)
             {
-                live_cell_count++;
-                cout << '@';
+                world_[h][w].is_live_ = true;
+                live_cell_count_++;
             }
             else
-                cout << ' ';
-            cout << ' ';
+                 world_[h][w].is_live_ = false;
         }
-        cout << endl;
     }
 }
 
 
 unsigned  Life::liveCellsCount() const
 {
-    return live_cell_count;
+    return live_cell_count_;
 }
 
 
-void Life::currentCellNeighborsCoord(vector<Cell> &neighbors, Cell currentCell)
+void Life::currentCellNeighborsCoord(vector<Cell> &neighbors, int x, int y)
 {
     unsigned counter = 0;
 
-    for (int h = currentCell.x - 1; h <= currentCell.x + 1; h++)
+    for (int h = y - 1; h <= y + 1; h++)
     {
-        for (int w = currentCell.y - 1; w <= currentCell.y + 1; w++)
+        for (int w = x - 1; w <= x + 1; w++)
         {
-            if (h == currentCell.x && w == currentCell.y)
+            if (h == y && w == x)
                 continue;
 
             // верхняя граница мира
@@ -76,33 +66,33 @@ void Life::currentCellNeighborsCoord(vector<Cell> &neighbors, Cell currentCell)
             {
                 // левый угол
                 if (w < 0)
-                    neighbors[counter] = world[height - 1][width - 1];
+                    neighbors_[counter] = oldWorld_[height_ - 1][width_ - 1];
                 // правый угол
-                else if (w > width - 1)
-                    neighbors[counter] = world[height - 1][0];
+                else if (w > width_ - 1)
+                    neighbors_[counter] = oldWorld_[height_ - 1][0];
                 else
-                    neighbors[counter] = world[height - 1][w];
+                    neighbors_[counter] = oldWorld_[height_ - 1][w];
             }
             // нижняя граница мира
-            else if (h > height - 1)
+            else if (h > height_ - 1)
             {
                 // левый угол
                 if (w < 0)
-                    neighbors[counter] = world[0][width - 1];
+                    neighbors_[counter] = oldWorld_[0][width_ - 1];
                 // правый угол
-                else if (w > width - 1)
-                    neighbors[counter] = world[0][0];
+                else if (w > width_ - 1)
+                    neighbors_[counter] = oldWorld_[0][0];
                 else
-                    neighbors[counter] = world[0][w];
+                    neighbors_[counter] = oldWorld_[0][w];
             }
             // левая граница мира
             else if (w < 0)
-                neighbors[counter] = world[h][width - 1];
+                neighbors_[counter] = oldWorld_[h][width_ - 1];
             // правая граница мира
-            else if (w > width - 1)
-                neighbors[counter] = world[h][0];
+            else if (w > width_ - 1)
+                neighbors_[counter] = oldWorld_[h][0];
             else
-                neighbors[counter] = world[h][w];
+                neighbors_[counter] = oldWorld_[h][w];
 
             counter++;
         }
@@ -110,14 +100,14 @@ void Life::currentCellNeighborsCoord(vector<Cell> &neighbors, Cell currentCell)
 }
 
 
-unsigned Life::currentCellLiveNeighborsCount(Life::Cell currentCell)
+unsigned Life::currentCellLiveNeighborsCount(int x, int y)
 {
     unsigned countLiveNeighbours = 0;
 
-    currentCellNeighborsCoord(neighbors, currentCell);
+    currentCellNeighborsCoord(neighbors_, x, y);
 
-    for(const auto &cell: neighbors)
-        if (cell.is_live)
+    for(const auto &cell: neighbors_)
+        if (cell.is_live_)
             countLiveNeighbours++;
 
     return countLiveNeighbours;
@@ -128,27 +118,33 @@ void Life::createNextGeneration()
 {
     unsigned countLiveNeighbours = 0;
 
-    for(const auto &h: oldWorld)
+    for (unsigned h = 0; h < height_; h++)
     {
-        for(const auto &w: h)
+        for(unsigned w = 0; w < width_; w++)
         {
-            countLiveNeighbours = currentCellLiveNeighborsCount(w);
+            countLiveNeighbours = currentCellLiveNeighborsCount(w, h);
 
-            if (!w.is_live && countLiveNeighbours == 3)
-                world[w.x][w.y].is_live = true;
-            else if (countLiveNeighbours < 2 || countLiveNeighbours > 3)
-                world[w.x][w.y].is_live = false;
+            if (!oldWorld_[h][w].is_live_ && countLiveNeighbours == 3)
+            {
+                world_[h][w].is_live_ = true;
+                live_cell_count_++;
+            }
+            else if (oldWorld_[h][w].is_live_ && (countLiveNeighbours < 2 || countLiveNeighbours > 3))
+            {
+                world_[h][w].is_live_ = false;
+                live_cell_count_--;
+            }
         }
     }
 }
 
 bool Life::compareWorlds()
 {
-    for (unsigned h = 0; h < height; h++)
+    for (unsigned h = 0; h < height_; h++)
     {
-        for(unsigned w = 0; w < width; w++)
+        for(unsigned w = 0; w < width_; w++)
         {
-            if (world[h][w].is_live != oldWorld[h][w].is_live)
+            if (world_[h][w].is_live_ != oldWorld_[h][w].is_live_)
                 return false;
         }
     }
@@ -159,28 +155,33 @@ bool Life::compareWorlds()
 
 void Life::begin_simulation()
 {
+    Console console;
     int numberOfGenerations = 0;
-    initWorld();
+    randomInitWorld();
 
     while(true)
     {
-        drawWorld();
-        cout << "----------------------------" << endl;
-        oldWorld = world;
+        console.drawWorld(*this);
+        msleep(200);
+        oldWorld_ = world_;
         createNextGeneration();
 
        if (compareWorlds())
        {
-           cout << "Optimal configuration detected: " << numberOfGenerations << endl;
+           std::string message = "Optimal configuration detected: " + std::to_string(numberOfGenerations);
+           mvaddstr(height_ / 2,  0, message.c_str());
            break;
        }
 
        if(!liveCellsCount())
        {
-           cout << "All points died: " << numberOfGenerations << endl;
+           std::string message = "All points died: " + std::to_string(numberOfGenerations);
+           mvaddstr(height_ / 2,  0, message.c_str());
            break;
        }
 
        numberOfGenerations++;
     }
+
+     getch();
 }

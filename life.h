@@ -20,7 +20,6 @@
 #include <iostream>
 #include <vector>
 
-
 using std::vector;
 using std::cout;
 using std::endl;
@@ -32,37 +31,33 @@ private:
 
     struct Cell
     {
-        int x;
-        int y;
-        bool is_live;
-
-        Cell() = default;
-        Cell(int x_, int y_) : x(x_), y(y_), is_live(false) {}
+        bool is_live_;
     };
 
-    unsigned height;
-    unsigned width;
-    mutable unsigned live_cell_count;
-    mutable vector<Cell> neighbors;
+    unsigned height_;
+    unsigned width_;
+    mutable unsigned live_cell_count_;
+    mutable vector<Cell> neighbors_;
 
-    vector<vector<Cell>> world;
-    vector<vector<Cell>> oldWorld;
+    vector<vector<Cell>> world_;
+    vector<vector<Cell>> oldWorld_;
 
-    void initWorld();
-    void drawWorld() const;
+    void randomInitWorld();
     unsigned liveCellsCount() const;
-    void currentCellNeighborsCoord(vector<Cell> &neighbors, Cell currentCell);
-    unsigned currentCellLiveNeighborsCount(Cell currentCell);
+    void currentCellNeighborsCoord(vector<Cell> &neighbors, int x, int y);
+    unsigned currentCellLiveNeighborsCount(int x, int y);
     void createNextGeneration();
     bool compareWorlds();
 
 public:
 
-    Life(unsigned height_, unsigned width_);
+    Life(unsigned height, unsigned width);
+
+    int height() const { return height_; }
+    int width() const { return width_; }
+    const vector<vector<Cell>> &world() const{ return world_; }
 
     void begin_simulation();
-
-
 };
 
 
