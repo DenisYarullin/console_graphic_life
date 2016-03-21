@@ -159,29 +159,29 @@ void Life::begin_simulation()
     int numberOfGenerations = 0;
     randomInitWorld();
 
-    while(true)
-    {
+    //while(!console.endSimulation())
+    //{
         console.drawWorld(*this);
-        msleep(200);
-        oldWorld_ = world_;
-        createNextGeneration();
+//        msleep(200);
+//        oldWorld_ = world_;
+//        createNextGeneration();
 
-       if (compareWorlds())
-       {
-           std::string message = "Optimal configuration detected: " + std::to_string(numberOfGenerations);
-           mvaddstr(height_ / 2,  0, message.c_str());
-           break;
-       }
+//       if (compareWorlds())
+//       {
+//           std::string message = "Optimal configuration detected: " + std::to_string(numberOfGenerations);
+//           mvaddstr(height_ / 2,  0, message.c_str());
+//           break;
+//       }
 
-       if(!liveCellsCount())
-       {
-           std::string message = "All points died: " + std::to_string(numberOfGenerations);
-           mvaddstr(height_ / 2,  0, message.c_str());
-           break;
-       }
+//       if(!liveCellsCount())
+//       {
+//           std::string message = "All points died: " + std::to_string(numberOfGenerations);
+//           mvaddstr(height_ / 2,  0, message.c_str());
+//           break;
+//       }
 
-       numberOfGenerations++;
-    }
+//       numberOfGenerations++;
+    //}
 
      getch();
 }

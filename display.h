@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 class Life;
+typedef struct _win_st WINDOW;
 
 class Display
 {
@@ -32,6 +33,16 @@ public:
 
     virtual bool endSimulation() const;
     virtual void drawWorld(const Life &life);
+    void drawMenubar(WINDOW *menubar);
+    WINDOW **drawMenuFile(int start_col);
+    WINDOW **drawMenuFigures(int start_col);
+    void drawWindow();
+    void deleteMenu(WINDOW **items, int count);
+    int scrollMenu(WINDOW **items, int count, int menu_start_col);
+
+private:
+    WINDOW *menubar_,*messagebar_;
+    WINDOW **items;
 };
 
 #endif // DISPLAY_H
