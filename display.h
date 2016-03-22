@@ -1,6 +1,9 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include <string>
+#include <vector>
+
 class Life;
 typedef struct _win_st WINDOW;
 
@@ -35,7 +38,8 @@ public:
     virtual void drawWorld(const Life &life);
     void drawMenubar(WINDOW *menubar);
     WINDOW **drawMenuFile(int start_col);
-    WINDOW **drawMenuFigures(int start_col);
+    WINDOW **drawMenuStillLifes(int start_col);
+    WINDOW **drawMenuOscillators(int start_col);
     void drawWindow();
     void deleteMenu(WINDOW **items, int count);
     int scrollMenu(WINDOW **items, int count, int menu_start_col);
@@ -43,6 +47,13 @@ public:
 private:
     WINDOW *menubar_,*messagebar_;
     WINDOW **items;
+
+    mutable int fileMenuOffset;
+    mutable int stillLifesOffset;
+    mutable int oscillatorsOffset;
+
+    std::vector<std::string> stillLifesNames;
+    std::vector<std::string> oscillatorsNames;
 };
 
 #endif // DISPLAY_H
