@@ -183,5 +183,5 @@ void Life::begin_simulation()
 //       numberOfGenerations++;
     //}
 
-     getch();
+     //getch();
 }

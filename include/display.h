@@ -47,6 +47,7 @@ public:
     int scrollMenu(WINDOW **items, int count, int menu_start_col);
 
 private:
+    int key, keyExit;
     WINDOW *menubar_, *messagebar_;
     WINDOW *fileMenuWin, *stillLifeMenuWin, *oscillatorMenuWin;
     ITEM **fileItems, **stillLifeItems, **oscillatorItems;

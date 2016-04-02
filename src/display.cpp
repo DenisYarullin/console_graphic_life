@@ -21,29 +21,31 @@ Console::Console() : Display()
     setWidth(COLS);
     setHeight(2* LINES);
     start_color();
-
+    //resizeterm(200, 200);
     init_pair(1, COLOR_MAGENTA, COLOR_BLACK); // This is an ordinary colours.
     init_pair(2, COLOR_BLACK, COLOR_MAGENTA); // This is reversed ones
     init_pair(3, COLOR_WHITE, COLOR_BLUE);
     init_pair(4, COLOR_BLUE, COLOR_WHITE);
     init_pair(5, COLOR_RED, COLOR_WHITE);
+    key = KEY_MAX;
+    keyExit = KEY_MAX;
 
     fileNames = {"Load", "Save", "Quit"};
+    //"Блок", "Бадья", "Лодка", "Корабль", "Змея",
+    //"Длинная змея", "Улей", "Каравай", "Пруд", "Длинная лодка",
+    //"Длинный корабль", "Баржа", "Рыболовный крючок", "Шляпа", "Авианосец",
+    //"Соты", "Тонущий корабль", "Дубинка", "Длинная баржа"
     stillLifeNames = {"Block", "Bucket", "Boat", "Ship", "Snake", "Long snake", "Hive", "Load", "Pond",
                       "Long boat", "Long ship", "Barge", "Fishhook", "Hat", "Aircraft carrier", "Honeycomb",
                       "Sinking ship", "Baton"};
-
+    //"Бакен", "Часы", "Жаба", "Восьмерка", "Пентадекатлон",
+    //"Тумблер", "Пульсар", "Бриллиантовое кольцо", "Вертушка",
+    //"Глайдер", "Корабль"};
     oscillatorNames = {"Buoy", "Clock", "Toad", "Eight", "Pentadekatlon", "Toggle switch", "Pulsar", "Diamond ring",
                        "Whirligig", "Glider", "Space ship"};
 
-    // stillLifesNames = {"Блок", "Бадья", "Лодка", "Корабль", "Змея",
-    // "Длинная змея", "Улей", "Каравай", "Пруд", "Длинная лодка",
-    // "Длинный корабль", "Баржа", "Рыболовный крючок", "Шляпа", "Авианосец",
-    //"Соты", "Тонущий корабль", "Дубинка", "Длинная баржа"};
 
-    //    oscillatorsNames = {"Бакен", "Часы", "Жаба", "Восьмерка", "Пентадекатлон",
-    //                        "Тумблер", "Пульсар", "Бриллиантовое кольцо", "Вертушка",
-    //                        "Глайдер", "Корабль"};
+
 }
 
 
@@ -154,7 +156,7 @@ WINDOW **Console::drawMenuFile(int countElem, int start_col)
     //mvwaddch(fileMenuWin, 2, 0, ACS_LTEE);
     //mvwhline(fileMenuWin, 2, 1, ACS_HLINE, 10);
     //mvwaddch(fileMenuWin, 2, 9, ACS_RTEE);
-    mvprintw(LINES - 2, 0, "F1 to exit");
+    //mvprintw(LINES - 2, 0, "F1 to exit");
     refresh();
 
     /* Post the menu */
@@ -172,8 +174,24 @@ WINDOW **Console::drawMenuFile(int countElem, int start_col)
         case KEY_UP:
             menu_driver(fileMenu, REQ_UP_ITEM);
             break;
+        case 9:
+            key = KEY_F(2);
+            break;
+        case 10:
+            werase(messagebar_);
+            wprintw(messagebar_, "Item selected is : %s", item_name(current_item(fileMenu)));
+            ITEM **items = menu_items(fileMenu);
+            if (!strcmp(item_name(current_item(fileMenu)), item_name(fileItems[2])))
+                keyExit = ESCAPE;
+            pos_menu_cursor(fileMenu);
+            wrefresh(messagebar_);
+            break;
         }
-        wrefresh(fileMenuWin);
+
+        if (key == KEY_F(2) || keyExit == ESCAPE)
+            break;
+
+        //wrefresh(fileMenuWin);
     }
 
 
@@ -213,9 +231,9 @@ WINDOW **Console::drawMenuStillLifes(int countElem, int start_col)
     /* Print a border around the main window and print a title */
     box(stillLifeMenuWin, 0, 0);
     //print_in_middle(stillLifeMenuWin, 1, 0, 22, "Still lifes", COLOR_PAIR(5));
-//    mvwaddch(stillLifeMenuWin, 2, 0, ACS_LTEE);
-//    mvwhline(stillLifeMenuWin, 2, 1, ACS_HLINE, 20);
-//    mvwaddch(stillLifeMenuWin, 2, 21, ACS_RTEE);
+    //    mvwaddch(stillLifeMenuWin, 2, 0, ACS_LTEE);
+    //    mvwhline(stillLifeMenuWin, 2, 1, ACS_HLINE, 20);
+    //    mvwaddch(stillLifeMenuWin, 2, 21, ACS_RTEE);
     refresh();
 
     /* Post the menu */
@@ -233,8 +251,21 @@ WINDOW **Console::drawMenuStillLifes(int countElem, int start_col)
         case KEY_UP:
             menu_driver(stillLifeMenu, REQ_UP_ITEM);
             break;
+        case 9:
+            key = KEY_F(3);
+            break;
+        case 10:
+            werase(messagebar_);
+            wprintw(messagebar_, "Item selected is : %s", item_name(current_item(stillLifeMenu)));
+            pos_menu_cursor(stillLifeMenu);
+            wrefresh(messagebar_);
+            break;
         }
-        wrefresh(stillLifeMenuWin);
+
+        if (key == KEY_F(3))
+            break;
+
+        //wrefresh(stillLifeMenuWin);
     }
 
 
@@ -293,10 +324,10 @@ WINDOW **Console::drawMenuOscillators(int countElem, int start_col)
 
     /* Print a border around the main window and print a title */
     box(oscillatorMenuWin, 0, 0);
-//    print_in_middle(oscillatorMenuWin, 1, 0, 19, "Oscillators", COLOR_PAIR(5));
-//    mvwaddch(oscillatorMenuWin, 2, 0, ACS_LTEE);
-//    mvwhline(oscillatorMenuWin, 2, 1, ACS_HLINE, 17);
-//    mvwaddch(oscillatorMenuWin, 2, 18, ACS_RTEE);
+    //    print_in_middle(oscillatorMenuWin, 1, 0, 19, "Oscillators", COLOR_PAIR(5));
+    //    mvwaddch(oscillatorMenuWin, 2, 0, ACS_LTEE);
+    //    mvwhline(oscillatorMenuWin, 2, 1, ACS_HLINE, 17);
+    //    mvwaddch(oscillatorMenuWin, 2, 18, ACS_RTEE);
     refresh();
 
     /* Post the menu */
@@ -314,8 +345,21 @@ WINDOW **Console::drawMenuOscillators(int countElem, int start_col)
         case KEY_UP:
             menu_driver(oscillatorMenu, REQ_UP_ITEM);
             break;
+        case 9:
+            key = KEY_F(1);
+            break;
+        case 10:
+            werase(messagebar_);
+            wprintw(messagebar_, "Item selected is : %s", item_name(current_item(oscillatorMenu)));
+            pos_menu_cursor(oscillatorMenu);
+            wrefresh(messagebar_);
+            break;
         }
-        wrefresh(oscillatorMenuWin);
+
+        if (key == KEY_F(1))
+            break;
+
+        //wrefresh(oscillatorMenuWin);
     }
 
 
@@ -350,6 +394,8 @@ void Console::deleteMenu(WINDOW *win, ITEM **items, MENU *menu, int count)
     for(int i = 0; i < count; i++)
         free_item(items[i]);
     delwin(win);
+    delwin(menubar_);
+    delwin(messagebar_);
 }
 
 
@@ -432,20 +478,21 @@ void Console::drawWindow()
     messagebar_ = subwin(stdscr, 1, COLS - 1, 23, 1);
 
     drawMenubar(menubar_);
-    //    move(2, 1);
-    //    printw("Press F1 or F2 to open the menus. ");
-    //    printw("ESC quits.");
+    move(2, 1);
+    printw("Press F1 or F2 to open the menus. ");
+    printw("ESC quits.");
     refresh();
 
-    int key;
     do {
         //        int selected_item;
         //        WINDOW **menu_items;
-        key = getch();
+        if (key == KEY_MAX)
+                key = getch();
         //        werase(messagebar_); // Erase terminal screen
         //        wrefresh(messagebar_);
         if (key == KEY_F(1))
         {
+            key = KEY_MAX;
             size_t numFileMenuElem = fileNames.size();
             drawMenuFile(numFileMenuElem, 0);
             deleteMenu(fileMenuWin, fileItems, fileMenu, numFileMenuElem + 1);
@@ -461,6 +508,7 @@ void Console::drawWindow()
         }
         else if (key == KEY_F(2))
         {
+            key = KEY_MAX;
             size_t numStillLifeMenuElem = stillLifeNames.size();
             drawMenuStillLifes(numStillLifeMenuElem, 0);
             deleteMenu(stillLifeMenuWin, stillLifeItems, stillLifeMenu, numStillLifeMenuElem + 1);
@@ -476,6 +524,7 @@ void Console::drawWindow()
         }
         else if (key == KEY_F(3))
         {
+            key = KEY_MAX;
             size_t numOscillatorMenuElem = oscillatorNames.size();
             drawMenuOscillators(numOscillatorMenuElem, 0);
             deleteMenu(oscillatorMenuWin, oscillatorItems, oscillatorMenu, numOscillatorMenuElem + 1);
@@ -489,10 +538,12 @@ void Console::drawWindow()
             touchwin(stdscr);
             refresh();
         }
-    } while (key != ESCAPE);
 
-    //    delwin(menubar_);
-    //    delwin(messagebar_);
+        if (keyExit == ESCAPE)
+            break;
+
+    } while (true);
+
 }
 
 
