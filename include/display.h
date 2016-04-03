@@ -33,7 +33,7 @@ private:
 class Console : public Display
 {
 public:
-    Console();
+    Console(int heightOffset, int widthOffset);
     virtual ~Console();
 
     virtual bool endSimulation() const;
@@ -56,6 +56,8 @@ private:
     std::vector<std::string> stillLifeNames;
     std::vector<std::string> oscillatorNames;
     std::vector<std::string> fileNames;
+
+    int heightOffset_, widthOffset_;
 };
 
 #endif // DISPLAY_H

@@ -9,17 +9,20 @@
 #define ENTER 10
 #define ESCAPE 27
 
-Console::Console() : Display()
+Console::Console(int heightOffset, int widthOffset)
+    : Display(), heightOffset_(heightOffset), widthOffset_(widthOffset)
 {
     setlocale(LC_ALL, "");
     initscr();
+    move(20, 20);
     noecho();
     keypad(stdscr, TRUE);
     cbreak();
+    timeout(48);
     curs_set(0);
     getmaxyx(stdscr, LINES, COLS);
     setWidth(COLS);
-    setHeight(2* LINES);
+    setHeight(2 * LINES);
     start_color();
     //resizeterm(200, 200);
     init_pair(1, COLOR_MAGENTA, COLOR_BLACK); // This is an ordinary colours.
@@ -51,6 +54,8 @@ Console::Console() : Display()
 
 Console::~Console()
 {
+    echo();
+    endwin();
     //    echo();
     //    unpost_menu(fileMenu);
     //    free_menu(fileMenu);
@@ -180,7 +185,6 @@ WINDOW **Console::drawMenuFile(int countElem, int start_col)
         case 10:
             werase(messagebar_);
             wprintw(messagebar_, "Item selected is : %s", item_name(current_item(fileMenu)));
-            ITEM **items = menu_items(fileMenu);
             if (!strcmp(item_name(current_item(fileMenu)), item_name(fileItems[2])))
                 keyExit = ESCAPE;
             pos_menu_cursor(fileMenu);
@@ -388,7 +392,7 @@ WINDOW **Console::drawMenuOscillators(int countElem, int start_col)
 
 void Console::deleteMenu(WINDOW *win, ITEM **items, MENU *menu, int count)
 {
-    echo();
+    //echo();
     unpost_menu(menu);
     free_menu(menu);
     for(int i = 0; i < count; i++)
@@ -487,7 +491,7 @@ void Console::drawWindow()
         //        int selected_item;
         //        WINDOW **menu_items;
         if (key == KEY_MAX)
-                key = getch();
+            key = getch();
         //        werase(messagebar_); // Erase terminal screen
         //        wrefresh(messagebar_);
         if (key == KEY_F(1))
@@ -538,6 +542,12 @@ void Console::drawWindow()
             touchwin(stdscr);
             refresh();
         }
+        else
+        {
+            key = KEY_MAX;
+            touchwin(stdscr);
+            refresh();
+        }
 
         if (keyExit == ESCAPE)
             break;
@@ -549,31 +559,30 @@ void Console::drawWindow()
 
 void Console::drawWorld(const Life &life)
 {
-    //drawMenuFile(0);
-    //drawMenuStillLifes(0);
-    //drawMenuOscillators(0);
-    drawWindow();
+    //drawWindow();
 
-    //    const auto &world = life.world();
+    erase();
 
-    //    for (unsigned w = 0; w < life.width(); w++)
-    //    {
-    //        for (unsigned h = 0; h < life.height() - 1; h += 2)
-    //        {
-    //            bool is_liveUpCell = world[h][w].is_live_;
-    //            bool is_liveDownCell = world[h + 1][w].is_live_;
+    const auto &world = life.world();
 
-    //            cchar_t t;
-    //            // For cells that has upper block (either full blocks or the upper one only) the reverse-colour trick is used.
-    //            t.attr = is_liveUpCell ? COLOR_PAIR(2) : COLOR_PAIR(1);
-    //            // For both upper and lower blocks either present or absent altogether we print space (i.e. full block).
-    //            // Otherwise, lower half block is printed.
-    //            t.chars[0] = (is_liveUpCell == is_liveDownCell) ? ' ' : 0x2584; // LOWER HALF BLOCK
-    //            t.chars[1] = 0;
+    for (unsigned w = 0; w < life.width(); w++)
+    {
+        for (unsigned h = 0; h < life.height() - 1; h += 2)
+        {
+            bool is_liveUpCell = world[h][w].is_live_;
+            bool is_liveDownCell = world[h + 1][w].is_live_;
 
-    //            mvadd_wch(h / 2, w, &t);
-    //        }
-    //    }
+            cchar_t t;
+            // For cells that has upper block (either full blocks or the upper one only) the reverse-colour trick is used.
+            t.attr = is_liveUpCell ? COLOR_PAIR(2) : COLOR_PAIR(1);
+            // For both upper and lower blocks either present or absent altogether we print space (i.e. full block).
+            // Otherwise, lower half block is printed.
+            t.chars[0] = (is_liveUpCell == is_liveDownCell) ? ' ' : 0x2584; // LOWER HALF BLOCK
+            t.chars[1] = 0;
+
+            mvadd_wch(h / 2 + heightOffset_, w + widthOffset_, &t);
+        }
+    }
     refresh();
 }
 

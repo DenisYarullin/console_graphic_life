@@ -38,11 +38,11 @@ private:
     unsigned width_;
     mutable unsigned live_cell_count_;
     mutable vector<Cell> neighbors_;
+    int numberOfGenerations_;
 
     vector<vector<Cell>> world_;
     vector<vector<Cell>> oldWorld_;
 
-    void randomInitWorld();
     unsigned liveCellsCount() const;
     void currentCellNeighborsCoord(vector<Cell> &neighbors, int x, int y);
     unsigned currentCellLiveNeighborsCount(int x, int y);
@@ -57,7 +57,8 @@ public:
     int width() const { return width_; }
     const vector<vector<Cell>> &world() const{ return world_; }
 
-    void begin_simulation();
+    void randomInitWorld();
+    void simulation();
 };
 
 

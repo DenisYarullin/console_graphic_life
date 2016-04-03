@@ -7,16 +7,16 @@
 
 
 #if defined(_WIN32) || defined(_WIN64)
-    #include <windows.h>
-    #define msleep(msec) Sleep(msec)
+#include <windows.h>
+#define msleep(msec) Sleep(msec)
 #else
-    #include <unistd.h>
-    #define msleep(msec) usleep(msec*1000)
+#include <unistd.h>
+#define msleep(msec) usleep(msec*1000)
 #endif
 
 
 Life::Life(unsigned height, unsigned width)
-    : height_(height), width_(width), live_cell_count_(0), neighbors_(8, Cell())
+    : height_(height), width_(width), live_cell_count_(0), neighbors_(8, Cell()), numberOfGenerations_(0)
 {
     world_.resize(height_, std::vector<Cell>(width_));
 }
@@ -38,7 +38,7 @@ void Life::randomInitWorld()
                 live_cell_count_++;
             }
             else
-                 world_[h][w].is_live_ = false;
+                world_[h][w].is_live_ = false;
         }
     }
 }
@@ -153,35 +153,23 @@ bool Life::compareWorlds()
 }
 
 
-void Life::begin_simulation()
+void Life::simulation()
 {
-    Console console;
-    int numberOfGenerations = 0;
-    randomInitWorld();
+    msleep(200);
+    oldWorld_ = world_;
+    createNextGeneration();
 
-    //while(!console.endSimulation())
-    //{
-        console.drawWorld(*this);
-//        msleep(200);
-//        oldWorld_ = world_;
-//        createNextGeneration();
+    if (compareWorlds())
+    {
+        std::string message = "Optimal configuration detected: " + std::to_string(numberOfGenerations_);
+        mvaddstr(height_ / 2,  0, message.c_str());
+    }
 
-//       if (compareWorlds())
-//       {
-//           std::string message = "Optimal configuration detected: " + std::to_string(numberOfGenerations);
-//           mvaddstr(height_ / 2,  0, message.c_str());
-//           break;
-//       }
+    if(!liveCellsCount())
+    {
+        std::string message = "All points died: " + std::to_string(numberOfGenerations_);
+        mvaddstr(height_ / 2,  0, message.c_str());
+    }
 
-//       if(!liveCellsCount())
-//       {
-//           std::string message = "All points died: " + std::to_string(numberOfGenerations);
-//           mvaddstr(height_ / 2,  0, message.c_str());
-//           break;
-//       }
-
-//       numberOfGenerations++;
-    //}
-
-     //getch();
+    numberOfGenerations_++;
 }
